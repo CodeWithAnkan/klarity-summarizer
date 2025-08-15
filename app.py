@@ -3,12 +3,11 @@ from transformers import pipeline, AutoTokenizer
 
 app = Flask(__name__)
 
-# Load the model and its specific tokenizer for precise truncation
-model_name = "sshleifer/distilbart-cnn-12-6"
-print("Loading summarization model and tokenizer...")
-summarizer = pipeline("summarization", model=model_name)
-tokenizer = AutoTokenizer.from_pretrained(model_name)
-print("Summarization model and tokenizer loaded successfully.")
+model_dir = "./model_files"
+print("Loading summarization model from local files...")
+summarizer = pipeline("summarization", model=model_dir)
+tokenizer = AutoTokenizer.from_pretrained(model_dir)
+print("Summarization model loaded successfully.")
 
 # --- THIS IS THE FIX ---
 # Add a simple health check endpoint at the root URL
