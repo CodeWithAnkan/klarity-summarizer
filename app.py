@@ -3,8 +3,8 @@ from transformers import pipeline, AutoTokenizer
 
 app = Flask(__name__)
 
-# --- THE FIX: Load the model AND its tokenizer ---
-model_name = "sshleifer/distilbart-cnn-12-6"
+# Load the model and its specific tokenizer for precise truncation
+model_name = "sshleifer/distilbart-cnn-1-6"
 print("Loading summarization model and tokenizer...")
 summarizer = pipeline("summarization", model=model_name)
 tokenizer = AutoTokenizer.from_pretrained(model_name)
@@ -18,15 +18,13 @@ def summarize_text():
 
     text_to_summarize = data['text']
     
-    # --- THIS IS THE ROBUST FIX ---
-    # Use the tokenizer to truncate the text to the model's exact max length
-    # We use 1024 as the limit for this BART-family model
+    # Use the tokenizer to safely truncate the text to the model's exact max length
+    # The limit for this BART-family model is 1024 tokens
     inputs = tokenizer(text_to_summarize, max_length=1024, return_tensors="pt", truncation=True)
-    text_to_summarize = tokenizer.decode(inputs["input_ids"][0], skip_special_tokens=True)
-    # --- END OF FIX ---
+    safe_text = tokenizer.decode(inputs["input_ids"][0], skip_special_tokens=True)
 
     try:
-        summary = summarizer(text_to_summarize, max_length=150, min_length=40, do_sample=False)
+        summary = summarizer(safe_text, max_length=150, min_length=40, do_sample=False)
         summary_text = summary[0]['summary_text']
         return jsonify({'summary_text': summary_text})
         
