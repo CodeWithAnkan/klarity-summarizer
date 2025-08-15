@@ -7,8 +7,8 @@ WORKDIR /app
 # Copy the requirements file into the container
 COPY requirements.txt .
 
-# Install the Python dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+# Install the Python dependencies, bypassing the system package lock
+RUN pip install --no-cache-dir -r requirements.txt --break-system-packages
 
 # Copy the rest of your application's code (app.py) into the container
 COPY . .
