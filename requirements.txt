@@ -1,4 +1,23 @@
-Flask
-transformers
-torch
-sentencepiece
+# Use an official lightweight Python runtime as a parent image
+FROM python:3.11-slim
+
+# Set the working directory inside the container
+WORKDIR /app
+
+# Copy the requirements file into the container
+COPY requirements.txt .
+
+# Install the Python dependencies
+RUN pip install --no-cache-dir -r requirements.txt --break-system-packages
+
+# Copy the rest of your application's code (app.py) into the container
+COPY . .
+
+# Expose the port the app runs on
+EXPOSE 5002
+
+# --- THIS IS THE FIX ---
+# Use Gunicorn to run the app. It's more robust for production.
+# We give it a long timeout of 600 seconds (10 minutes) to allow the model to load.
+CMD ["gunicorn", "--bind", "0.0.0.0:5002", "--timeout", "600", "app:app"]
+# --- END OF FIX ---
